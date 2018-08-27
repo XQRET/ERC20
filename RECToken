@@ -1,3 +1,5 @@
+// updated by chh
+// our total supply will change to 4billion
 pragma solidity ^0.4.8;
 contract Token{
     // token总量，默认会为public变量生成一个getter函数接口，名称为totalSupply().
