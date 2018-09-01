@@ -1,7 +1,9 @@
 pragma solidity ^0.4.24;
 /**
 1.Create tokens
-2、有5个账户（对外销售、科研、基金会储备、团队、合伙），代币创建成功后，调用相应的方法，根据规定，将代币按不同的比例自动分发到5个账户中；
+2.There is five account(foreign sales,research,foundation reserves,group,partnership)
+after the success of the tokens created,call the corresponding method,according to the regulation
+will automatically distribute tokens by different proportion to five accounts
 3、实现代币的转发
 */
 /**
