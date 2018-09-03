@@ -4,12 +4,12 @@ pragma solidity ^0.4.24;
 2.There is five account(foreign sales,research,foundation reserves,group,partnership)
 after the success of the tokens created,call the corresponding method,according to the regulation
 will automatically distribute tokens by different proportion to five accounts
-3、实现代币的转发
+3.Implement token transfer
 */
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that throw on error
-   防止整数溢出问题
+   To prevent the integer overflow
  */
 library SafeMath {
   function mul(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -70,35 +70,35 @@ contract ERC20 {
 }
 
 
-//设置代币控制合约的管理员
+//Set the administrator of contract for token
 contract Owned {
  
-    // modifier(条件)，表示必须是权力所有者才能do something，类似administrator的意思
+    // `modifier`(conditions),It's meaning that the owner just do it which is like administrator
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;//do something 
     }
  
-	//权力所有者
+	// The owner of the power
     address public owner;
  
-	//合约创建的时候执行，执行合约的人是第一个owner
+	//when the contract is created,the creator is the owner.
     constructor() public {
         owner = msg.sender;
     }
-	//新的owner,初始为空地址，类似null
+	//similar to null,the new onwer that we initial address is empty
     address newOwner=0x0;
  
-	//更换owner成功的事件
+	//when the owner changed tell me
     event OwnerUpdate(address _prevOwner, address _newOwner);
  
-    //现任owner把所有权交给新的owner(需要新的owner调用acceptOwnership方法才会生效)
+    //current owner give the onwership to the new onwer which need the new onwer call `acceptOwnership` function to take effect(just only this way)
     function changeOwner(address _newOwner) public onlyOwner {
         require(_newOwner != owner);
         newOwner = _newOwner;
     }
  
-    //新的owner接受所有权,权力交替正式生效
+    // new owner to accept onwership
     function acceptOwnership(address tempAddress) public{
         newOwner = tempAddress;
         require(msg.sender == newOwner);
@@ -109,24 +109,24 @@ contract Owned {
 }
 
 /**
- * @title ERC代币
- * xingqiao
+ * @title ERC token
+ * XQ
  */
 contract UtilityToken is ERC20,Owned {
   
   using SafeMath for uint256;
 
    uint256 totalSupply_;
-   string public name = "UtilityToken"; // 代币名称
-   string public symbol = "RET";        // 简写名称RET
-   uint8  public  decimals = 18;           // 支持小数点后几位 例如 0.0001
-   uint256 public INITIAL_SUPPLY = 400000000; //代币发行总量
+   string public name = "UtilityToken"; // name of tokens
+   string public symbol = "RET";        // short name just you look
+   uint8  public  decimals = 18;           // support a few deciaml places,for example 0.0001
+   uint256 public INITIAL_SUPPLY = 400000000; //total amount
 
 
-   //分配账户
+   //flag to assigned account
    bool public DistributionAccountEnabled = true;
 
-   //声明五个账号余额
+   //declare five account balance
    uint256  public tokenSaleBalance;
    uint256  public technicalAndEcoSystemBalance;
    uint256  public foundationReserveBalance;
@@ -134,58 +134,58 @@ contract UtilityToken is ERC20,Owned {
    uint256  public partnershipBalance;
     mapping (address => mapping (address => uint256)) internal allowed;
     
-   //设置黑名单集合
+   //set the blacklist
     mapping (address => bool) public frozenAccount;
   
-    //设置黑名单通知事件
+    //blacklist notification events
     event FrozenFunds(address target, bool frozen);
   
-    /* 在区块链上创建一个事件，用以通知客户端*/
-    event Transfer(address indexed from, address indexed to, uint256 value);  //转帐通知事件
+    /* create an event on block chain to inform the client*/
+    event Transfer(address indexed from, address indexed to, uint256 value);  //transfer notification event
     
     mapping(address => uint256) balances;  
 
 
-    /* 初始化合约，并且把初始的所有代币都给这合约的创建者
-     * @param totalSupply_ 代币的总数
-     * @param tokenName 代币名称
-     * @param tokenSymbol 代币符号
+    /* initial contract and give all tokens to the founder of this contract
+     * @param totalSupply_ total number of tokens
+     * @param tokenName name of tokens
+     * @param tokenSymbol short name just you look
      */
     constructor() public {
          totalSupply_ = INITIAL_SUPPLY* 10** uint256(decimals);
-         balances[msg.sender] = totalSupply_;  // 将合约创建者的代币数量设置为发行量，即发行时所有的代币归创建者所有
+         balances[msg.sender] = totalSupply_;  // set the number of tokens to the creator,all token is the creator
      }
 
   
-  //设置黑名单
+  //set the blacklist
   function freezeAccount(address target, bool freeze) public onlyOwner {
     frozenAccount[target] = freeze;
     emit FrozenFunds(target, freeze);
   }
   
     /**
-  * @dev Gets 指定地址的余额.
-  * @param _owner 查询余额的地址.
-  * @return An uint256 表示已通过的地址所拥有的金额.
+  * @dev Get the balance of address
+  * @param _owner the address that you need to search
+  * @return An uint256 the balance of the specified address
   */
   function balanceOf(address _owner) public view returns (uint256) {
     return balances[_owner];
   }
 
   /**
-   * @dev Function 检查所有者允许使用的token数量。.
-   * @param _owner address 拥有资金的地址.
-   * @param _spender address 将花费资金的地址.
-   * @return A uint256 指定仍可用于支出器的令牌数量.
+   * @dev Function check the owner that allows to use of the number of token
+   * @param _owner address address with money
+   * @param _spender address the address that willcost money
+   * @return A uint256 the specified number that can be used,rest of token
    */
   function allowance(address _owner, address _spender) public view returns (uint256){
     return allowed[_owner][_spender];
   }
 
     /**
-     * 从主帐户合约调用者发送给别人代币
-     * @param  _to address 接受代币的地址
-     * @param  _value uint256 接受代币的数量
+     * from the contract caller send the token to _to
+     * @param  _to address the address of accepting tokens
+     * @param  _value uint256 accept the number of tokens
      */
   function transfer(address _to, uint256 _value) public returns (bool) {
     require(_value <= balances[msg.sender]);
@@ -199,12 +199,12 @@ contract UtilityToken is ERC20,Owned {
     return true;
   }
     /**
-     * 从某个指定的帐户中，向另一个帐户发送代币
-     * 调用过程，会检查设置的允许最大交易额
-     * @param  _from address 发送者地址
-     * @param  _to address 接受者地址
-     * @param  _value uint256 要转移的代币数量
-     * @return success        是否交易成功
+     * from a specified account to another account to send tokens
+     * when call process that will check the max amount can be used
+     * @param  _from address the address of sender
+     * @param  _to address the address of recipient
+     * @param  _value uint256 the number of tokens to transfer
+     * @return success        success or false
      */
   function transferFrom(address _from, address _to,uint256 _value) public returns (bool) {
     require(_value <= balances[_from]);
@@ -220,10 +220,10 @@ contract UtilityToken is ERC20,Owned {
   }
 
     /**
-     * 设置帐户允许支付的最大金额
-     * 一般在智能合约的时候，避免支付过多，造成风险
-     * @param _spender 帐户地址
-     * @param _value 金额
+     * set the account pay the max amount are allowed
+     * when in contract we need to avoid pay more that is not you want so will cause risk
+     * @param _spender the account address
+     * @param _value amount
      */
   function approve(address _spender, uint256 _value) public onlyOwner returns (bool) {
     allowed[msg.sender][_spender] = _value;
@@ -232,7 +232,7 @@ contract UtilityToken is ERC20,Owned {
   }
 
 
-   //管理员分发代币方法到五个账户,1,对外销售,2科研,3基金会储备,4团队,5合伙
+   // administrator distribute tokens methods to five accounts(foreign sales,research,foundation reserves,group,partnership)
    function  distributionToFiveAccount(address _tokenSale,address _technicalAndEcoSystem,address _foundationReserve,address _team,address _partnership ) public onlyOwner returns (bool success){
         require(_tokenSale != address(0));
         require(_technicalAndEcoSystem != address(0));
@@ -242,13 +242,13 @@ contract UtilityToken is ERC20,Owned {
         require(totalSupply_>0);
 
         if(DistributionAccountEnabled){
-        //计算分配数目
+        // computing distribution number
         tokenSaleBalance= totalSupply_.div(4);
         technicalAndEcoSystemBalance=totalSupply_.mul(35).div(100);
         foundationReserveBalance=totalSupply_.mul(20).div(100);
         teamBalance=totalSupply_.mul(10).div(100);
         partnershipBalance=totalSupply_.mul(10).div(100);
-        //赋值
+        // assignment
         transfer(_tokenSale, tokenSaleBalance);
         transfer(_technicalAndEcoSystem, technicalAndEcoSystemBalance);
         transfer(_foundationReserve, foundationReserveBalance);
