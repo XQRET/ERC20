@@ -6,6 +6,8 @@
 
 ### RETToken
 
+> We think that it's important for use different language 
+
 ```
 token总量，默认会为public变量生成一个getter函数接口，名称为totalSupply().
 Token amount, will default to public variables generated a getter function interface, called totalSupply ().
@@ -69,7 +71,6 @@ Token referred to as"
 
 初始token数量给予消息发送者
 The initial token number to give the message sender
-
 
 ```
 
