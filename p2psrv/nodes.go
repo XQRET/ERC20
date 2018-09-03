@@ -7,7 +7,6 @@ package p2psrv
 
 import (
 	"sync"
-
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"github.com/ethereum/go-ethereum/rlp"
 )
