@@ -5,40 +5,40 @@ contract Token{
     // token amount that will default to public variables generated a getter function inteface which called totalSupply()
     uint256 public totalSupply;
 
-    /// 获取账户_owner拥有token的数量 
+    // get the number of account _owner which has token 
     function balanceOf(address _owner) constant returns (uint256 balance);
 
-    //从消息发送者账户中往_to账户转数量为_value的token
+    // from msg.sender to send the _value of number token to account _to
     function transfer(address _to, uint256 _value) returns (bool success);
 
-    //从账户_from中往账户_to转数量为_value的token，与approve方法配合使用
+    // from account _from to send the _value of number token to _to which must be used with approve method and the method of caller is not be msg.sender
     function transferFrom(address _from, address _to, uint256 _value) returns   
     (bool success);
 
-    //消息发送账户设置账户_spender能从发送账户中转出数量为_value的token
+    // msg.sender account that set account _spender can transfer how many token from sending account(msg.sender) number of _value token
     function approve(address _spender, uint256 _value) returns (bool success);
 
-    //获取账户_spender可以从账户_owner中转出token的数量
+    // get account _sender how many it can transfer from account _onwer the number of the token
     function allowance(address _owner, address _spender) constant returns 
     (uint256 remaining);
 
-    //发生转账时必须要触发的事件 
+    // trigger event when transfer occurs
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-    //当函数approve(address _spender, uint256 _value)成功执行时必须触发的事件
+    // when the function approve(address _spender, uint256 _value) executed successfully that must trigger event
     event Approval(address indexed _owner, address indexed _spender, uint256 
     _value);
 }
 
 contract StandardToken is Token {
     function transfer(address _to, uint256 _value) returns (bool success) {
-        //默认totalSupply 不会超过最大值 (2^256 - 1).
-        //如果随着时间的推移将会有新的token生成，则可以用下面这句避免溢出的异常
+        // the default total supply will not exceed the maximum(2^256-1)
+        // as the time go there will be more new token generated,you can use the following to avoid overflow exception
         //require(balances[msg.sender] >= _value && balances[_to] + _value > balances[_to]);
         require(balances[msg.sender] >= _value);
-        balances[msg.sender] -= _value;//从消息发送者账户中减去token数量_value
-        balances[_to] += _value;//往接收账户增加token数量_value
-        Transfer(msg.sender, _to, _value);//触发转币交易事件
+        balances[msg.sender] -= _value;// from the message sender account to minus the _value of number token
+        balances[_to] += _value;// increase the number of _value token to receiving account
+        Transfer(msg.sender, _to, _value);// trigger the event
         return true;
     }
 
@@ -48,10 +48,10 @@ contract StandardToken is Token {
         //require(balances[_from] >= _value && allowed[_from][msg.sender] >= 
         // _value && balances[_to] + _value > balances[_to]);
         require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
-        balances[_to] += _value;//接收账户增加token数量_value
-        balances[_from] -= _value; //支出账户_from减去token数量_value
-        allowed[_from][msg.sender] -= _value;//消息发送者可以从账户_from中转出的数量减少_value
-        Transfer(_from, _to, _value);//触发转币交易事件
+        balances[_to] += _value;// receiving account increase _value number of token
+        balances[_from] -= _value; // account _from minus the number of _value token
+        allowed[_from][msg.sender] -= _value;// the msg.sender which can transfer must be reduce
+        Transfer(_from, _to, _value);// trigger the function of transfer
         return true;
     }
     function balanceOf(address _owner) constant returns (uint256 balance) {
@@ -68,7 +68,7 @@ contract StandardToken is Token {
 
 
     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
-        return allowed[_owner][_spender];//允许_spender从_owner中转出的token数
+        return allowed[_owner][_spender];// the number of token which the _spender can transit from _owner
     }
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) allowed;
@@ -77,21 +77,21 @@ contract StandardToken is Token {
 contract RECToken is StandardToken { 
 
     /* Public variables of the token */
-    string public name;                   //名称: eg Simon Bucks
-    uint8 public decimals;               //最多的小数位数，How many decimals to show. ie. There could 1000 base units with 3 decimals. Meaning 0.980 SBX = 980 base units. It's like comparing 1 wei to 1 ether.
-    string public symbol;               //token简称: eg SBX
-    string public version = 'H0.1';    //版本
+    string public name;                   // token name, eg Simon Bucks
+    uint8 public decimals;               // most of the decimal digits，How many decimals to show. ie. There could 1000 base units with 3 decimals. Meaning 0.980 RET = 980 base units. It's like comparing 1 wei to 1 ether.
+    string public symbol;               // token short name: eg SBX
+    string public version = 'R0.1';    // version
 
     function RECToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) {
-        balances[msg.sender] = _initialAmount; // 初始token数量给予消息发送者
-        totalSupply = _initialAmount;         // 设置初始总量
-        name = _tokenName;                   // token名称
-        decimals = _decimalUnits;           // 小数位数
-        symbol = _tokenSymbol;             // token简称
+        balances[msg.sender] = _initialAmount; // the initial token number to give the msg.sender
+        totalSupply = _initialAmount;         // set the initial total amount
+        name = _tokenName;                   // token name
+        decimals = _decimalUnits;           // most of the decimal digits
+        symbol = _tokenSymbol;             // token short name
     }
 
     /* Approves and then calls the receiving contract */
-    
+    // the function was deprected
     function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
         allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
